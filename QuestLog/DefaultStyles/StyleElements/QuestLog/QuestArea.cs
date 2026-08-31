@@ -169,10 +169,15 @@ namespace QuestBooks.QuestLog.DefaultStyles
             SortedElements ??= SelectedChapter?.Elements.OrderBy(x => x.DrawPriority).ToArray() ?? null;
 
             // Get the top-most element that is being hovered
-            QuestLogElement lastHoveredElement = mouseInBounds ? SortedElements?.LastOrDefault(x =>
-                x.IsHovered(placementPosition, QuestAreaOffset, Zoom, ref MouseTooltip) &&
-                (SelectedElement is null || !UseDesigner || (Array.FindIndex(SortedElements, e => e == x) < Array.FindIndex(SortedElements, e => e == SelectedElement))), null)
-                ?? null : null;
+            // .ToArray() here so that the Where query doesn't loop all elements multiple times
+            var hoveredElements = SortedElements?.Where(x => x.IsHovered(placementPosition, QuestAreaOffset, Zoom, ref MouseTooltip)).ToArray() ?? [];
+            QuestLogElement lastHoveredElement = mouseInBounds ? hoveredElements.LastOrDefault(x =>
+                SelectedElement is null ||                    // No element selected -----------------> top element
+                !UseDesigner ||                               // Out of designer ---------------------> top element
+                !hoveredElements.Contains(SelectedElement) || // Previous element no longer hovered --> top element
+                // ------------------------------------------ // If none of the above, get the next highest element
+                Array.FindIndex(SortedElements, e => e == x) < Array.FindIndex(SortedElements, e => e == SelectedElement),
+                null) : null; // If there are no elements left after the above steps, deselect
 
             HoveredElement = lastHoveredElement;
 

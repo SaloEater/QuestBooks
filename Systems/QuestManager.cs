@@ -126,7 +126,7 @@ namespace QuestBooks.Systems
                 return true;
             }
 
-            result = default;
+            result = null;
             return false;
         }
 

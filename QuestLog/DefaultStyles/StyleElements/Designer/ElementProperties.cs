@@ -488,6 +488,7 @@ namespace QuestBooks.QuestLog.DefaultStyles
 
                 // Self explanatory
                 bool selected = bundle.MemberInfo == selectedMember;
+                bool clearInput = false;
 
                 if (memberArea.Contains(mouseCanvas))
                 {
@@ -507,6 +508,9 @@ namespace QuestBooks.QuestLog.DefaultStyles
                         selected = member is not null;
                         SoundEngine.PlaySound(SoundID.MenuTick);
                     }
+
+                    if (RightMouseJustReleased && selected)
+                        clearInput = true;
                 }
 
                 // If we were editing and clicked somewhere else, stop editing
@@ -520,15 +524,15 @@ namespace QuestBooks.QuestLog.DefaultStyles
                 if (selected)
                 {
                     DrawTasks.Add(_ =>
-                     {
-                         PlayerInput.WritingText = true;
-                         Main.instance.HandleIME();
-                     });
+                    {
+                        PlayerInput.WritingText = true;
+                        Main.instance.HandleIME();
+                    });
 
                     string value = bundle.Value;
                     bool pasting = Main.keyState.PressingControl() && Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.V);
 
-                    string newValue = Main.GetInputText(pasting && !holdingPaste ? "" : value);
+                    string newValue = Main.GetInputText(clearInput || (pasting && !holdingPaste) ? "" : value);
                     holdingPaste = pasting;
 
                     // Only do parsing on new values (every frame would be ridiculous)
