@@ -6,6 +6,17 @@ public delegate bool KillTilePredicate(int x, int y, int type);
 
 public delegate void KillTileCallback(int x, int y, int type);
 
+/// <remarks>
+///     This hook reports that a tile was destroyed, not that the player destroyed it. It fires for
+///     every successful <see cref="WorldGen.KillTile(int, int, bool, bool, bool)"/> - plants drowning,
+///     tiles losing their support, liquids, NPCs, projectiles, and other players' edits arriving over
+///     the network - and carries no player to attribute the break to.<br/>
+///     <br/>
+///     That is fine for a quest matching a specific tile type that completes once, but a quest that
+///     <i>counts</i> breaks will climb on its own while the player does nothing. Those should subscribe
+///     to <see cref="Terraria.GameContent.Achievements.AchievementsHelper.OnTileDestroyed"/> instead,
+///     which only fires while <c>AchievementsHelper.CurrentlyMining</c> is set and supplies the player.
+/// </remarks>
 public abstract class KillTileHook : GlobalTile
 {
     /// <summary>

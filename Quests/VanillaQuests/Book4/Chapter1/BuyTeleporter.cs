@@ -1,17 +1,13 @@
 ﻿using QuestBooks.Quests.QuestSystems;
 using QuestBooks.Systems;
-using Terraria.ModLoader.IO;
 
 namespace QuestBooks.Quests.VanillaQuests.Book4.Chapter1;
 
-public class BuyTeleporter : VanillaQuest
+public class BuyTeleporter : CounterQuest
 {
-    public int TeleportersBought { get; set; }
+    public override QuestType QuestType => QuestType.Player;
 
-    public override bool CheckCompletion() => false;
+    public override int Goal => 2;
 
-    public override void SaveProgress(TagCompound tag) => tag[nameof(TeleportersBought)] = TeleportersBought >= 2 ? null : TeleportersBought;
-    public override void LoadProgress(TagCompound tag) => TeleportersBought = tag.GetInt(nameof(TeleportersBought));
-
-    public class BuyTeleporterCheck() : BuyItemHook(item => Match(item, ItemID.Teleporter), static (_, _) => QuestManager.GetQuest<BuyTeleporter>().TeleportersBought++);
+    public class BuyTeleporterCheck() : BuyItemHook(item => Match(item, ItemID.Teleporter), static (_, _) => QuestManager.GetQuest<BuyTeleporter>().Count++);
 }

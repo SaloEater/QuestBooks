@@ -2,7 +2,7 @@
 
 namespace QuestBooks.Quests.VanillaQuests.Book3.Chapter3;
 
-public class RunMarathon : VanillaQuest
+public class RunMarathon : CounterQuest
 {
     /// <summary>
     ///     The number of tiles the player must run in order to complete the quest.
@@ -48,7 +48,15 @@ public class RunMarathon : VanillaQuest
         position = Main.LocalPlayer.position;
     }
 
-    public override bool CheckCompletion() => TilesTravelled >= TargetTiles;
+    // Progress is stored as a float in pixels rather than as the base class' int, so both the
+    // count and its persistence are overridden here.
+    public override int Count
+    {
+        get => TilesTravelled;
+        protected set => PixelsTravelled = value * 16f;
+    }
+
+    public override int Goal => TargetTiles;
 
     public override void SaveProgress(TagCompound tag) => tag[TagKey] = PixelsTravelled;
     public override void LoadProgress(TagCompound tag) => PixelsTravelled = tag.GetFloat(TagKey);
