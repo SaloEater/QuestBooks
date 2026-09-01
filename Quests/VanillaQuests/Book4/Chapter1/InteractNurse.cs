@@ -22,7 +22,7 @@ public class InteractNurse : VanillaQuest
 
     public override QuestType QuestType => QuestType.Player;
 
-    public override bool CheckCompletion() => CoinsTarget >= CoinsSpent;
+    public override bool CheckCompletion() => CoinsSpent >= CoinsTarget;
 
     public override void SaveProgress(TagCompound tag) => tag[Tag] = CoinsSpent;
 

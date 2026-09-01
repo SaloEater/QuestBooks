@@ -156,7 +156,12 @@ namespace QuestBooks.Quests
         ///     The <see cref="TagCompound"/> to save progress to.
         /// </param>
         /// <remarks>
-        ///     The given <see cref="TagCompound"/> is shared across quests.
+        ///     The given <see cref="TagCompound"/> belongs to this quest alone, so your keys cannot
+        ///     collide with those of any other quest. Saving nothing omits this quest from the save entirely.<br/>
+        ///     <br/>
+        ///     Prefer a literal key held in a <see langword="const"/> over <c>nameof</c>. Both compile to
+        ///     the same string, but <c>nameof</c> ties the save format to a member name, so renaming that
+        ///     member silently changes the key and orphans every existing save's progress.
         /// </remarks>
         public virtual void SaveProgress(TagCompound tag) { }
 
@@ -167,7 +172,8 @@ namespace QuestBooks.Quests
         ///     The <see cref="TagCompound"/> to load progress from.
         /// </param>
         /// <remarks>
-        ///     The given <see cref="TagCompound"/> is shared across quests.
+        ///     The given <see cref="TagCompound"/> belongs to this quest alone, and matches the one passed
+        ///     to <see cref="SaveProgress(TagCompound)"/>. Saving nothing omits this quest from the save entirely.
         /// </remarks>
         public virtual void LoadProgress(TagCompound tag) { }
     }

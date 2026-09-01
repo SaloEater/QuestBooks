@@ -6,6 +6,10 @@ namespace QuestBooks.Quests.VanillaQuests.Book1.Chapter0;
 
 public class KillMarriage : VanillaQuest
 {
+    private const string GroomTag = "Groom";
+
+    private const string BrideTag = "Bride";
+
     public bool GroomKilled { get; private set; }
 
     public bool BrideKilled { get; private set; }
@@ -14,14 +18,14 @@ public class KillMarriage : VanillaQuest
 
     public override void SaveProgress(TagCompound tag)
     {
-        tag[nameof(GroomKilled)] = GroomKilled;
-        tag[nameof(BrideKilled)] = BrideKilled;
+        tag[GroomTag] = GroomKilled;
+        tag[BrideTag] = BrideKilled;
     }
 
     public override void LoadProgress(TagCompound tag)
     {
-        GroomKilled = tag.GetBool(nameof(GroomKilled));
-        BrideKilled = tag.GetBool(nameof(BrideKilled));
+        GroomKilled = tag.GetBool(GroomTag);
+        BrideKilled = tag.GetBool(BrideTag);
     }
 
     public sealed class KillGroomHook() : KillNPCHook(static npc => npc.type == NPCID.TheGroom, static _ => QuestManager.GetQuest<KillMarriage>().GroomKilled = true);

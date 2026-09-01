@@ -17,6 +17,7 @@ namespace QuestBooks.Systems
     internal class QuestLoader : ModSystem
     {
         private const string TagKey = "QuestBooks:CompletedQuests";
+        private const string ProgressTagKey = "QuestBooks:QuestProgress";
 
         // We use a separate dictionary for loading and accessing to
         // improve performance and ensure that quests are not modified post-setup.
@@ -93,15 +94,16 @@ namespace QuestBooks.Systems
                     QuestManager.UnloadedCompletedWorldQuests.Add(quest);
             }
 
+            // Progress is restored before the completion sweep below, so that a quest whose
+            // restored progress already meets its goal is marked complete right away.
+            LoadQuestProgress(QuestManager.WorldQuests, tag);
+
             // Immediately mark any quests that should have previously been completed
             foreach (var quest in QuestManager.IncompleteWorldQuests.Select(QuestManager.GetQuest).ToArray())
             {
                 if (quest.CheckCompletion())
                     QuestManager.MarkComplete(quest);
             }
-
-            foreach (var quest in QuestManager.WorldQuests.Values)
-                quest.LoadProgress(tag);
 
             QuestLogDrawer.ActiveStyle.LoadWorldData(tag);
         }
@@ -126,14 +128,15 @@ namespace QuestBooks.Systems
                         QuestManager.UnloadedCompletedPlayerQuests.Add(quest);
                 }
 
+                // Progress is restored before the completion sweep below, so that a quest whose
+                // restored progress already meets its goal is marked complete right away.
+                LoadQuestProgress(QuestManager.PlayerQuests, tagCompound);
+
                 foreach (var quest in QuestManager.IncompletePlayerQuests.Select(QuestManager.GetQuest).ToArray())
                 {
                     if (quest.CheckCompletion())
                         QuestManager.MarkComplete(quest);
                 }
-
-                foreach (var quest in QuestManager.PlayerQuests.Values)
-                    quest.LoadProgress(tagCompound);
 
                 QuestLogDrawer.ActiveStyle.LoadPlayerData(tagCompound);
 
@@ -151,6 +154,9 @@ namespace QuestBooks.Systems
         {
             var worldQuests = QuestManager.CompletedWorldQuests?.Concat(QuestManager.UnloadedCompletedWorldQuests) ?? QuestManager.UnloadedCompletedWorldQuests;
             tag[TagKey] = worldQuests.ToArray();
+
+            SaveQuestProgress(QuestManager.WorldQuests, tag);
+
             QuestLogDrawer.ActiveStyle.SaveWorldData(tag);
         }
 
@@ -160,8 +166,47 @@ namespace QuestBooks.Systems
             {
                 var playerQuests = QuestManager.CompletedPlayerQuests?.Concat(QuestManager.UnloadedCompletedPlayerQuests) ?? QuestManager.UnloadedCompletedPlayerQuests;
                 tag[TagKey] = playerQuests.ToArray();
+
+                SaveQuestProgress(QuestManager.PlayerQuests, tag);
+
                 QuestLogDrawer.ActiveStyle.SavePlayerData(tag);
             }
+        }
+
+        // Each quest writes into its own TagCompound, stored by quest key under a single
+        // "progress" compound. Quests never share a compound, so their keys cannot collide.
+        private static void SaveQuestProgress(FrozenDictionary<string, Quest> quests, TagCompound tag)
+        {
+            if (quests is null || tag is null)
+                return;
+
+            TagCompound allProgress = new();
+
+            foreach (var quest in quests.Values)
+            {
+                TagCompound questProgress = new();
+                quest.SaveProgress(questProgress);
+
+                if (questProgress.Count > 0)
+                    allProgress[quest.Key] = questProgress;
+            }
+
+            if (allProgress.Count > 0)
+                tag[ProgressTagKey] = allProgress;
+        }
+
+        private static void LoadQuestProgress(FrozenDictionary<string, Quest> quests, TagCompound tag)
+        {
+            if (quests is null || tag is null)
+                return;
+
+            if (!tag.TryGet(ProgressTagKey, out TagCompound allProgress))
+                allProgress = new TagCompound();
+
+            // Quests with no stored progress are still called, with an empty compound,
+            // so that they can reset any state left over from a previous world.
+            foreach (var quest in quests.Values)
+                quest.LoadProgress(allProgress.TryGet(quest.Key, out TagCompound questProgress) ? questProgress : new TagCompound());
         }
 
         #endregion

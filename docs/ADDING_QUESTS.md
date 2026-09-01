@@ -200,8 +200,8 @@ There are a couple other methods on quests that you can override to implement cu
 - `void Update()` - called once every frame on every quest, regardless of client vs. server<br/>
 - `void OnCompletion()` - called when the quest is completed by the player. This is not called if the quest was completed before the player loads into the world.<br/>
 - `void MarkAsComplete()` - called when the quest is marked as complete. This is called even if the quest was completed before the player loads in the world.<br/>
-- `void SaveProgress(TagCompound tag)` - called when the player exits the world. The `TagCompound` will belong to the world if `quest.QuestType == QuestType.World`, and the player for `QuestType.Player`. Allows you to save quest progress.<br/>
-- `void LoadProgress(TagCompound tag)` - called when the player enters the world. The `TagCompound` will belong to the world if `quest.QuestType == QuestType.World`, and the player for `QuestType.Player`. Allows you to load quest progress.
+- `void SaveProgress(TagCompound tag)` - called when the world is saved, including on autosave. The progress is written into the world save if `quest.QuestType == QuestType.World`, and the player save for `QuestType.Player`. Allows you to save quest progress.<br/>
+- `void LoadProgress(TagCompound tag)` - called when the player enters the world, before completed quests are re-checked. The progress is read from the world save if `quest.QuestType == QuestType.World`, and the player save for `QuestType.Player`. Allows you to load quest progress.
 
 Note that the progress saving methods share their `TagCompound`s globally with all other quests, so ensure that the key you use is distinct.
 
