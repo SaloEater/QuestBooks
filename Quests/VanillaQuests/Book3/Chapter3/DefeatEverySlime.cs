@@ -62,5 +62,9 @@ public class DefeatEverySlime : VanillaQuest
 
     public sealed class KillSlimeHook() : KillNPCHook(
         npc => AllSlimes.Contains(npc.netID),
-        npc => QuestManager.GetQuest<DefeatEverySlime>().KilledSlimes.Add(npc.netID));
+        npc =>
+        {
+            if (QuestManager.TryGetQuest<DefeatEverySlime>(out var quest))
+                quest.KilledSlimes.Add(npc.netID);
+        });
 }

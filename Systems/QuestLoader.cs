@@ -24,9 +24,17 @@ namespace QuestBooks.Systems
         internal static readonly Dictionary<Type, string> loadingQuests = [];
 
         /// <summary>
-        /// Whether or not the quest completion status' have been loaded for a selected world/character.
+        /// Whether world quest state is live. True from <see cref="OnWorldLoad"/> until
+        /// <see cref="OnWorldUnload"/>, on every side - including a dedicated server, which has
+        /// no local player but still owns the world.
         /// </summary>
-        public static bool QuestsLoaded { get; private set; } = false;
+        public static bool WorldQuestsLoaded { get; private set; } = false;
+
+        /// <summary>
+        /// Whether the local player's quest state has been read. Never true on a dedicated server,
+        /// since it has no local player entering the world.
+        /// </summary>
+        public static bool PlayerQuestsLoaded { get; private set; } = false;
 
         public static Dictionary<Type, Mod> QuestMods { get; } = [];
         public static FrozenDictionary<Type, string> QuestKeys { get; internal set; }
@@ -137,7 +145,7 @@ namespace QuestBooks.Systems
 
                 QuestLogDrawer.ActiveStyle.LoadPlayerData(tagCompound);
 
-                QuestsLoaded = true;
+                PlayerQuestsLoaded = true;
             }
         }
 
@@ -145,7 +153,7 @@ namespace QuestBooks.Systems
 
         #region Quest Saving
 
-        public override void ClearWorld() => QuestsLoaded = false;
+        public override void ClearWorld() => PlayerQuestsLoaded = false;
 
         public override void SaveWorldData(TagCompound tag)
         {
@@ -168,9 +176,17 @@ namespace QuestBooks.Systems
 
         // This is the first loading related method called on world entry.
         // We use it to reset which quests are considered "complete".
-        public override void OnWorldLoad() => QuestManager.ResetActiveQuests();
+        public override void OnWorldLoad()
+        {
+            QuestManager.ResetActiveQuests();
+            WorldQuestsLoaded = true;
+        }
 
-        public override void OnWorldUnload() => QuestManager.UnloadActiveQuests();
+        public override void OnWorldUnload()
+        {
+            QuestManager.UnloadActiveQuests();
+            WorldQuestsLoaded = false;
+        }
 
         public static void LoadCompletedQuests(IEnumerable<string> completedQuests, out IEnumerable<string> unloadedQuests)
         {

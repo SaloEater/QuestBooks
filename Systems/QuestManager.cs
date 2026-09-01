@@ -107,7 +107,20 @@ namespace QuestBooks.Systems
             QuestLogDrawer.ActiveStyle?.SelectQuestLog(questLog);
         }
 
-        internal static Quest GetQuest(string questName) => ActiveQuests[questName];
+        /// <summary>
+        /// Whether quest instances currently exist. Only true between <see cref="ResetActiveQuests"/>
+        /// and <see cref="UnloadActiveQuests"/>, i.e. while a world is loaded.<br/>
+        /// <br/>
+        /// Code that can run outside a world - detours on vanilla methods especially, since packet
+        /// handling invokes them before the world finishes loading - must check this or use
+        /// <see cref="TryGetQuest{TQuest}(out TQuest)"/>.
+        /// </summary>
+        public static bool QuestsActive => ActiveQuests is not null;
+
+        internal static Quest GetQuest(string questName) => QuestsActive
+            ? ActiveQuests[questName]
+            : throw new InvalidOperationException($"Quest \"{questName}\" was requested while no world was loaded. Quests only exist while a world is loaded; use TryGetQuest from code that can run outside one.");
+
         internal static TQuest GetQuest<TQuest>() where TQuest : Quest => (TQuest)GetQuest(QuestLoader.QuestKeys[typeof(TQuest)]);
 
         internal static bool TryGetQuest(string questName, out Quest result)

@@ -57,7 +57,8 @@ public class CraftEvilBarArmor : VanillaQuest
                 return;
             }
 
-            var quest = QuestManager.GetQuest<CraftEvilBarArmor>();
+            if (!QuestManager.TryGetQuest<CraftEvilBarArmor>(out var quest))
+                return;
 
             if (!quest.Head)
             {

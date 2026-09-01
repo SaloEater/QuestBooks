@@ -4,10 +4,11 @@ namespace QuestBooks.Systems
 {
     internal class QuestUpdater : ModSystem
     {
-        // Update the active quest log style.
+        // Update the active quest log style. The log is client-only, so this needs the
+        // local player's quests rather than the world's.
         public override void UpdateUI(GameTime gameTime)
         {
-            if (!QuestLoader.QuestsLoaded)
+            if (!QuestLoader.PlayerQuestsLoaded)
                 return;
 
             foreach (var questBook in QuestManager.QuestBooks)
@@ -19,7 +20,7 @@ namespace QuestBooks.Systems
         // Loop through and check quest completion post-update.
         public override void PostUpdateEverything()
         {
-            if (!QuestLoader.QuestsLoaded)
+            if (!QuestLoader.WorldQuestsLoaded)
                 return;
 
             var allQuests = QuestManager.ActiveQuests.Values.ToArray();
@@ -34,7 +35,7 @@ namespace QuestBooks.Systems
 
             // Player quests are updated in singleplayer and on multiplayer clients.
             // Not on the server.
-            if (!Main.dedServ)
+            if (!Main.dedServ && QuestLoader.PlayerQuestsLoaded)
                 UpdateIncompleteQuests(QuestManager.IncompletePlayerQuests);
         }
 

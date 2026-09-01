@@ -29,14 +29,8 @@ public class SmashGeodes : VanillaQuest
 
         public override void RightClick(Item item, Player player)
         {
-            var quest = QuestManager.GetQuest<SmashGeodes>();
-
-            if (quest.Completed)
-            {
-                return;
-            }
-
-            quest.GeodesSmashed++;
+            if (QuestManager.TryGetQuest<SmashGeodes>(out var quest) && !quest.Completed)
+                quest.GeodesSmashed++;
         }
     }
 }

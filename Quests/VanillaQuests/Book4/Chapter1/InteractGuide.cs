@@ -39,14 +39,10 @@ public class InteractGuide : VanillaQuest
     {
         orig(inv, context, slot);
 
-        var quest = QuestManager.GetQuest<InteractGuide>();
-
-        if (quest.Completed)
+        if (!QuestManager.TryGetQuest<InteractGuide>(out var quest) || quest.Completed)
             return;
 
-        var guide = context == ItemSlot.Context.GuideItem;
-
-        if (!guide)
+        if (context != ItemSlot.Context.GuideItem)
             return;
 
         var item = Main.guideItem;

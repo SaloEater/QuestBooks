@@ -24,7 +24,15 @@ public class KillMarriage : VanillaQuest
         BrideKilled = tag.GetBool(nameof(BrideKilled));
     }
 
-    public sealed class KillGroomHook() : KillNPCHook(static npc => npc.type == NPCID.TheGroom, static _ => QuestManager.GetQuest<KillMarriage>().GroomKilled = true);
+    public sealed class KillGroomHook() : KillNPCHook(static npc => npc.type == NPCID.TheGroom, static _ =>
+    {
+        if (QuestManager.TryGetQuest<KillMarriage>(out var quest))
+            quest.GroomKilled = true;
+    });
 
-    public sealed class KillBrideHook() : KillNPCHook(static npc => npc.type == NPCID.TheBride, static _ => QuestManager.GetQuest<KillMarriage>().BrideKilled = true);
+    public sealed class KillBrideHook() : KillNPCHook(static npc => npc.type == NPCID.TheBride, static _ =>
+    {
+        if (QuestManager.TryGetQuest<KillMarriage>(out var quest))
+            quest.BrideKilled = true;
+    });
 }

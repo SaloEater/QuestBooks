@@ -32,9 +32,7 @@ public class InteractNurse : VanillaQuest
     {
         public override void PostNurseHeal(NPC nurse, int health, bool removeDebuffs, int price)
         {
-            var quest = QuestManager.GetQuest<InteractNurse>();
-
-            if (quest.Completed)
+            if (!QuestManager.TryGetQuest<InteractNurse>(out var quest) || quest.Completed)
                 return;
 
             quest.CoinsSpent += price;

@@ -13,5 +13,9 @@ public class BuyTeleporter : VanillaQuest
     public override void SaveProgress(TagCompound tag) => tag[nameof(TeleportersBought)] = TeleportersBought >= 2 ? null : TeleportersBought;
     public override void LoadProgress(TagCompound tag) => TeleportersBought = tag.GetInt(nameof(TeleportersBought));
 
-    public class BuyTeleporterCheck() : BuyItemHook(item => Match(item, ItemID.Teleporter), static (_, _) => QuestManager.GetQuest<BuyTeleporter>().TeleportersBought++);
+    public class BuyTeleporterCheck() : BuyItemHook(item => Match(item, ItemID.Teleporter), static (_, _) =>
+    {
+        if (QuestManager.TryGetQuest<BuyTeleporter>(out var quest) && !quest.Completed)
+            quest.TeleportersBought++;
+    });
 }

@@ -29,11 +29,14 @@ public class ShimmerPhase : VanillaQuest
         {
             var shimmering = Player.shimmering;
 
-            if (shimmering && !flag)
-                QuestManager.GetQuest<ShimmerPhase>().Start(Player);
+            if (QuestManager.TryGetQuest<ShimmerPhase>(out var quest))
+            {
+                if (shimmering && !flag)
+                    quest.Start(Player);
 
-            if (!shimmering && flag)
-                QuestManager.GetQuest<ShimmerPhase>().End(Player);
+                if (!shimmering && flag)
+                    quest.End(Player);
+            }
 
             flag = shimmering;
         }
